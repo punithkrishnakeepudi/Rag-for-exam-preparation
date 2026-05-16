@@ -132,8 +132,8 @@ def load_chunks(document_ids: list[str] | None = None) -> list[Chunk]:
     return [Chunk(**dict(row)) for row in rows]
 
 
-def get_retriever(document_ids: list[str] | None = None) -> HybridRetriever:
-    retriever = HybridRetriever()
+def get_retriever(conn, document_ids: list[str] | None = None) -> HybridRetriever:
+    retriever = HybridRetriever(db_conn=conn)
     retriever.index(load_chunks(document_ids))
     return retriever
 
@@ -186,8 +186,8 @@ async def answer_question(session_id: str, question: str, answer_mode: str, docu
             (message_id, session_id, "user", answer_mode, question, now_iso()),
         )
 
-    retriever = get_retriever(document_scope)
-    results = retriever.search(question, top_k=settings.top_k)
+        retriever = get_retriever(conn, document_scope)
+        results = retriever.search(question, top_k=settings.top_k, document_ids=document_scope)
     context = format_context(results)
     prompt = exam_writer_prompt(question, answer_mode, context)
 
@@ -259,9 +259,10 @@ async def answer_question(session_id: str, question: str, answer_mode: str, docu
 
 
 async def generate_notes(session_id: str, document_id: str, topic: str | None, style: str) -> dict[str, Any]:
-    retriever = get_retriever([document_id])
-    query = topic or "chapter summary"
-    results = retriever.search(query, top_k=settings.top_k)
+    with get_db() as conn:
+        retriever = get_retriever(conn, [document_id])
+        query = topic or "chapter summary"
+        results = retriever.search(query, top_k=settings.top_k, document_ids=[document_id])
     context = format_context(results)
     prompt = notes_prompt(query, context)
     client = OllamaClient(settings.ollama_host, settings.ollama_model)
@@ -287,8 +288,9 @@ async def generate_notes(session_id: str, document_id: str, topic: str | None, s
 
 
 async def generate_diagram(session_id: str, document_id: str, topic: str, diagram_type: str) -> dict[str, Any]:
-    retriever = get_retriever([document_id])
-    results = retriever.search(topic, top_k=5)
+    with get_db() as conn:
+        retriever = get_retriever(conn, [document_id])
+        results = retriever.search(topic, top_k=5, document_ids=[document_id])
     context = format_context(results)
     prompt = diagram_prompt(topic, context, diagram_type)
     client = OllamaClient(settings.ollama_host, settings.ollama_model)
@@ -308,8 +310,9 @@ async def generate_diagram(session_id: str, document_id: str, topic: str, diagra
 
 
 def search_documents(query: str, document_id: str | None = None) -> list[dict[str, Any]]:
-    retriever = get_retriever([document_id] if document_id else None)
-    results = retriever.search(query, top_k=settings.top_k)
+    with get_db() as conn:
+        retriever = get_retriever(conn, [document_id] if document_id else None)
+        results = retriever.search(query, top_k=settings.top_k, document_ids=[document_id] if document_id else None)
     return [
         {
             "chunk_id": c.id,

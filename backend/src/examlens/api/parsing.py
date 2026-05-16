@@ -11,6 +11,7 @@ class ParsedDocument:
     text: str
     title: str | None = None
     pages: list[str] | None = None
+    headings: list[dict[str, Any]] | None = None
 
 
 def _clean_text(text: str) -> str:
@@ -21,6 +22,18 @@ def _clean_text(text: str) -> str:
     return text.strip()
 
 
+def _extract_headings(text: str) -> list[dict[str, Any]]:
+    """Simple heading extraction based on common patterns."""
+    headings = []
+    lines = text.split("\n")
+    for i, line in enumerate(lines):
+        line = line.strip()
+        # Matches "Chapter 1", "1. Introduction", "## Heading"
+        if re.match(r"^(#{1,3}\s+|Chapter\s+\d+|[A-Z\d]+\.\s+[A-Z])", line, re.I):
+            headings.append({"text": line, "line": i})
+    return headings
+
+
 def parse_pdf(path: Path) -> ParsedDocument:
     import fitz
 
@@ -28,7 +41,13 @@ def parse_pdf(path: Path) -> ParsedDocument:
     pages = []
     for page in doc:
         pages.append(_clean_text(page.get_text("text")))
-    return ParsedDocument(text="\n\n".join(pages), title=path.stem, pages=pages)
+    full_text = "\n\n".join(pages)
+    return ParsedDocument(
+        text=full_text,
+        title=path.stem,
+        pages=pages,
+        headings=_extract_headings(full_text)
+    )
 
 
 def parse_docx(path: Path) -> ParsedDocument:

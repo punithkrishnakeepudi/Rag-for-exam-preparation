@@ -1,71 +1,53 @@
 SYSTEM_PROMPT = """You are ExamLens, a local study assistant.
-Use only the provided source context. Do not use outside knowledge.
-If the answer is not supported by the sources, say: "Not found in the uploaded sources."
-Be concise, exam-oriented, and structured.
-Always include citations for factual statements.
-Never invent facts or steps.
+Use only provided context. If context is insufficient, say "Not found in sources."
+Be concise, exam-oriented, and structured. Always cite sources as [doc_id:page].
 """
-
 
 def exam_writer_prompt(question: str, answer_mode: str, context: str) -> str:
-    return f"""Write an exam-oriented answer using only the source context.
+    # Mode-specific instruction augmentation
+    mode_map = {
+        "2-mark": "Write a 2-mark answer: 1 clear definition and 2 supporting bullet points.",
+        "5-mark": "Write a 5-mark answer: Introduction, 5 structured bullet points, and a concluding sentence.",
+        "10-mark": "Write a 10-mark long-form answer: Detailed introduction, multiple themed sections with bullet points, and a summary.",
+        "comparison": "Create a comparison table between the main entities mentioned.",
+        "definition": "Provide a precise 1-sentence definition followed by a brief explanation.",
+    }
+    mode_instr = mode_map.get(answer_mode, f"Format the answer for {answer_mode}.")
 
-Question:
-{question}
-
-Answer mode:
-{answer_mode}
-
-Source context:
+    return f"""TASK: {mode_instr}
+QUESTION: {question}
+CONTEXT:
 {context}
 
-Rules:
-- Use only facts supported by the source context.
-- Keep the answer in the requested exam format.
-- Include inline citations like [doc:page].
-- If evidence is missing, say "Not found in the uploaded sources."
-- Prefer short, high-value wording.
-
-Return exactly:
-Title:
-Answer:
-Citations:
+RULES:
+1. Use ONLY context.
+2. Structure with headings and bullets.
+3. Citation format: [doc_id:page].
+4. Return Answer ONLY.
 """
-
 
 def notes_prompt(topic: str, context: str) -> str:
-    return f"""Create study notes from the source context.
-
-Topic:
-{topic}
-
-Source context:
+    return f"""Generate structured study notes for: {topic}
+CONTEXT:
 {context}
 
-Rules:
-- Use Markdown.
-- Include summary, key concepts, definitions, important points, formulas/steps, important questions, and viva questions.
-- Keep it grounded in the sources.
-- Add citations after each section.
-"""
+STRUCTURE:
+# {topic}
+## Summary
+## Key Concepts
+## Important Questions (Exam-style)
+## Viva Questions
 
+RULES: Use Markdown. Ground every claim in context.
+"""
 
 def diagram_prompt(topic: str, context: str, diagram_type: str) -> str:
-    return f"""Generate Mermaid code grounded in the source context.
-
-Task:
-{diagram_type}
-
-Topic:
-{topic}
-
-Source context:
+    return f"""Task: Create a Mermaid.js {diagram_type} for {topic}.
+CONTEXT:
 {context}
 
-Rules:
-- Use only information found in the source context.
-- Keep node labels short.
-- Output valid Mermaid code only.
-- If the source does not support a diagram, return: Not enough structured information for a reliable diagram.
+RULES:
+1. Output ONLY Mermaid code block.
+2. Keep node labels under 5 words.
+3. If context lacks process/hierarchy, say "Not enough info."
 """
-
