@@ -7,3 +7,4 @@ dist/
 data/
 frontend/dist/
 backend/.pytest_cache/
+*.egg-info/
