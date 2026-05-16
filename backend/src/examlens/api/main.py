@@ -83,7 +83,10 @@ async def upload_documents(
         ids.append(ingest_paste("pasted-notes", paste_text))
     if files:
         for file in files:
-            target = upload_dir / file.filename
+            if not file.filename:
+                continue
+            filename = Path(file.filename).name
+            target = upload_dir / filename
             with target.open("wb") as handle:
                 shutil.copyfileobj(file.file, handle)
             ids.append(ingest_file(target, source_type or "mixed"))
