@@ -1,4 +1,6 @@
 import { useEffect, useMemo, useState } from 'react'
+import ReactMarkdown from 'react-markdown'
+import Mermaid from './Mermaid'
 
 type DocumentRow = {
   id: string
@@ -228,7 +230,9 @@ export default function App() {
 
             <div className="answerCard">
               <div className="answerTitle">{answerMode}</div>
-              <pre>{answer || 'Your grounded answer will appear here.'}</pre>
+              <div className="markdownContent">
+                <ReactMarkdown>{answer || 'Your grounded answer will appear here.'}</ReactMarkdown>
+              </div>
             </div>
           </div>
 
@@ -262,11 +266,15 @@ export default function App() {
             <div className="stack">
               <div>
                 <div className="subTitle">Notes</div>
-                <pre className="notesBox">{notes || 'Generated notes will appear here.'}</pre>
+                <div className="notesBox">
+                  <ReactMarkdown>{notes || 'Generated notes will appear here.'}</ReactMarkdown>
+                </div>
               </div>
               <div>
                 <div className="subTitle">Mermaid</div>
-                <pre className="diagramBox">{diagram || 'Generated Mermaid diagram will appear here.'}</pre>
+                <div className="diagramBox">
+                  {diagram ? <Mermaid chart={diagram} /> : 'Generated Mermaid diagram will appear here.'}
+                </div>
               </div>
             </div>
           </div>
