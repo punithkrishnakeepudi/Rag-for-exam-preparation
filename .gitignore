@@ -1,9 +1,20 @@
-.DS_Store
-*.pyc
+# data (uploads, vector DB, sqlite)
+backend/data/
+
+# python
 __pycache__/
+*.pyc
+*.pyo
 .venv/
-node_modules/
 dist/
-data/
+*.egg-info/
+
+# node
+frontend/node_modules/
 frontend/dist/
-backend/.pytest_cache/
+
+# env
+.env
+
+# misc
+.DS_Store
