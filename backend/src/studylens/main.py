@@ -18,7 +18,7 @@ from .config import ASSETS_PATH, ENABLE_IMAGE_GEN, IMAGE_GEN_MODEL, RAG_TOP_K, U
 os.makedirs(ASSETS_PATH, exist_ok=True)  # must exist before StaticFiles mounts
 from .db import Document, Message, Notebook, create_db, engine, get_session
 from .ingest import chunk_text, extract_text
-from .ollama import embed, generate, json_generate, stream as ollama_stream
+from .openrouter import embed, generate, json_generate, stream as llm_stream
 from .prompts import (
     MINDMAP_PROMPT,
     MINDMAP_SYSTEM,
@@ -338,7 +338,7 @@ async def chat(nb_id: int, body: ChatRequest):
 
     async def event_stream():
         yield f"data: {json.dumps({'type': 'sources', 'sources': sources})}\n\n"
-        async for token in ollama_stream(prompt, RAG_SYSTEM):
+        async for token in llm_stream(prompt, RAG_SYSTEM):
             yield f"data: {json.dumps({'type': 'token', 'token': token})}\n\n"
         yield f"data: {json.dumps({'type': 'done'})}\n\n"
 
@@ -364,11 +364,11 @@ async def generate_quiz(doc_id: int, body: QuizRequest, session: Session = Depen
     async def sse():
         accumulated = ""
         try:
-            async for token in ollama_stream(QUIZ_PROMPT.format(n=body.n, text=text[:5000]), QUIZ_SYSTEM):
+            async for token in llm_stream(QUIZ_PROMPT.format(n=body.n, text=text[:5000]), QUIZ_SYSTEM):
                 accumulated += token
                 yield f"data: {json.dumps({'type': 'token', 'token': token})}\n\n"
         except httpx.ReadTimeout:
-            yield f"data: {json.dumps({'type': 'error', 'message': 'Ollama timed out. Try qwen2.5:1.5b or reduce question count.'})}\n\n"
+            yield f"data: {json.dumps({'type': 'error', 'message': 'OpenRouter timed out. Try a faster model or reduce question count.'})}\n\n"
             return
         yield f"data: {json.dumps({'type': 'done', 'quiz_text': accumulated, 'doc_name': doc_name})}\n\n"
 
@@ -393,13 +393,13 @@ async def generate_slides(
     async def sse():
         accumulated = ""
         try:
-            async for token in ollama_stream(
+            async for token in llm_stream(
                 SLIDES_PROMPT.format(text=text[:4000]), SLIDES_SYSTEM, format_json=True
             ):
                 accumulated += token
                 yield f"data: {json.dumps({'type': 'token', 'token': token})}\n\n"
         except httpx.ReadTimeout:
-            yield f"data: {json.dumps({'type': 'error', 'message': 'Ollama timed out — try qwen2.5:1.5b'})}\n\n"
+            yield f"data: {json.dumps({'type': 'error', 'message': 'OpenRouter timed out — try a faster model.'})}\n\n"
             return
 
         try:
@@ -440,11 +440,11 @@ async def generate_mindmap(doc_id: int, session: Session = Depends(get_session))
     async def sse():
         accumulated = ""
         try:
-            async for token in ollama_stream(MINDMAP_PROMPT.format(text=text[:2500]), MINDMAP_SYSTEM):
+            async for token in llm_stream(MINDMAP_PROMPT.format(text=text[:2500]), MINDMAP_SYSTEM):
                 accumulated += token
                 yield f"data: {json.dumps({'type': 'token', 'token': token})}\n\n"
         except httpx.ReadTimeout:
-            yield f"data: {json.dumps({'type': 'error', 'message': 'Ollama timed out. Try qwen2.5:1.5b.'})}\n\n"
+            yield f"data: {json.dumps({'type': 'error', 'message': 'OpenRouter timed out. Try a faster model.'})}\n\n"
             return
         try:
             start, end = accumulated.find("{"), accumulated.rfind("}") + 1

@@ -1,0 +1,1387 @@
+ABSTRACT
+
+Cybersecurity has become an essential requirement for individuals and organizations because digital threats such as phishing URLs, suspicious emails, and potentially malicious files can cause data loss, credential theft, and unauthorized access. Traditional protection approaches often require users to inspect suspicious content manually or depend on separate tools for different types of threats. To address this need, the project “Phish Guard AI” is designed as a web-based cyber threat detection and response application that brings multiple security analysis functions into a single interface.
+
+The application is implemented using Python and Flask. It provides user registration and login, authenticated access to a security dashboard, and separate scanners for phishing URLs, suspicious email content, and potentially dangerous file names. Flask-SQL Alchemy is used to connect the application with a SQLite database, while Flask-Login manages user sessions. Passwords are protected using Werk Zeug password hashing rather than being stored as plain text.
+
+The URL analyser currently provides a phishing-risk response containing a prediction, confidence value, and risk level. The email analyser provides a safe prediction and confidence value, while the malware analyser checks file extensions such as .exe, .bat, .scr, .cmd, and .vbs and reports a high-risk warning for those extensions. The project also contains a machine-learning training module and dependencies such as scikit-learn, pandas, numpy, and joblib; however, the supplied archive contains an empty training script and placeholder logic for the URL and email analyzers. Therefore, this report describes the supplied implementation faithfully rather than assuming a completed trained model that is not present in the archive.
+
+The proposed application demonstrates how web application development, authentication, database management, and threat-analysis modules can be combined to provide a centralized cybersecurity interface. The system can be extended in the future with trained machine-learning models, persistent scan history, improved malware analysis, threat intelligence integration, explainable predictions, and stronger security controls.
+
+Keywords: PhishGuard AI, Cybersecurity, Phishing Detection, URL Analysis, Email Threat Detection, Malware Detection, Flask, SQLite, Machine Learning, Web Security, Threat Analysis.
+
+INDEX
+
+S. No.
+
+CONTENT
+
+PAGE NUMBER
+
+ACKNOWLEDGEMENT
+
+i
+
+DECLARATION
+
+ii
+
+ABSTRACT
+
+iii
+
+LIST OF FIGURES
+
+1
+
+LIST OF TABLES
+
+2
+
+LIST OF ABBREVIATIONS
+
+3
+
+1
+
+INTRODUCTION
+
+4-5
+
+2
+
+LITERATURE REVIEW
+
+6-8
+
+3
+
+METHODOLOGY
+
+9-14
+
+4
+
+IMPLEMENTATION
+
+15-18
+
+5
+
+TESTING & DEPLOYMENT
+
+19-22
+
+6
+
+RESULTS AND DISCUSSION
+
+23-26
+
+7
+
+CONCLUSION AND FUTURE SCOPE
+
+27-28
+
+REFERENCES
+
+29
+
+LIST OF FIGURES
+
+Figure No.
+
+Figure Name
+
+Page No.
+
+Figure 3.1
+
+System Architecture of PhishGuard AI
+
+11
+
+Figure 3.2
+
+System Workflow of PhishGuard AI
+
+13
+
+Figure 3.3
+
+Threat Analysis Workflow of PhishGuard AI
+
+14
+
+Figure 6.1
+
+User Registration Interface
+
+Figure 6.2
+
+Successful User Login Interface
+
+Figure 6.3
+
+URL Threat Scanner Interface
+
+Figure 6.4
+
+Email Threat Detection Interface
+
+Figure 6.5
+
+Malware Risk Scanner Interface
+
+Figure 6.6
+
+Security Reports Interface
+
+LIST OF TABLES
+
+Table No.
+
+Title
+
+Page No.
+
+Table 3.1
+
+Technologies Used in the System
+
+11
+
+Table 3.2
+
+Major System Modules
+
+12
+
+Table 4.1
+
+User Information Stored in the Database
+
+16
+
+Table 5.1
+
+Functional Test Cases
+
+21
+
+Table 6.1
+
+Functional Testing Results
+
+25
+
+LIST OF ABBRAVATIONS
+
+Abbreviation
+
+Full Form
+
+AI
+
+Artificial Intelligence
+
+API
+
+Application Programming Interface
+
+DB
+
+Database
+
+JWT
+
+JSON Web Token
+
+ML
+
+Machine Learning
+
+UI
+
+User Interface
+
+URL
+
+Uniform Resource Locator
+
+HTTP
+
+Hypertext Transfer Protocol
+
+REST
+
+Representational State Transfer
+
+1. INTRODUCTION
+
+1.1 Background
+
+Cybersecurity has become a critical requirement in the modern digital environment because individuals and organizations depend heavily on online services for communication, financial transactions, data storage, and business operations. With the rapid growth of internet usage, cyber threats such as phishing websites, malicious emails, and harmful files have increased significantly. These threats can lead to credential theft, unauthorized access, financial loss, and leakage of sensitive information.
+
+With the advancement of Artificial Intelligence (AI) and Machine Learning (ML), automated threat detection systems can analyse digital content and identify potential security risks. AI-based cybersecurity solutions can assist users by providing faster analysis and risk assessment of suspicious activities.
+
+The proposed system “PhishGuard AI” is a web-based cybersecurity application designed to provide multiple threat detection features through a single platform. The system focuses on detecting phishing URLs, analysing suspicious email content, and identifying potentially dangerous file types. It provides users with an easy-to-use security dashboard where they can perform different threat analysis operations.
+
+The system combines web application development, authentication mechanisms, database management, and cybersecurity analysis modules to provide a centralized platform for detecting common cyber threats.
+
+1.2 Problem Statement
+
+The increasing number of cyber-attacks has made it difficult for normal users to identify and avoid malicious digital content. Phishing URLs, suspicious emails, and malware-containing files are commonly used by attackers to steal sensitive information and compromise systems.
+
+Existing security approaches often require separate tools for different threat categories. Users need to manually check URLs, inspect email content, or scan files using different applications. This creates complexity and reduces the efficiency of threat detection.
+
+Therefore, there is a need for an integrated cybersecurity application that can analyse different types of digital threats in a single platform and provide users with understandable security warnings and risk information.
+
+The PhishGuard AI system addresses this problem by providing URL analysis, email threat detection, and malware file risk checking features through a web-based interface.
+
+1.3 Need for the System
+
+The main need for the proposed system is to provide a simple and centralized approach for identifying common cyber threats.
+
+The system is useful because it:
+
+Reduces the difficulty of manually identifying phishing attempts.
+
+Provides a single platform for multiple security checks.
+
+Helps users analyse suspicious URLs and emails.
+
+Detects potentially dangerous file extensions.
+
+Provides security risk information in an understandable format.
+
+Improves awareness about cyber threats.
+
+Provides authenticated access to security features.
+
+1.4 Objectives
+
+The main objectives of the PhishGuard AI system are:
+
+To develop a web-based cybersecurity threat detection application.
+
+To provide phishing URL analysis functionality.
+
+To analyse suspicious email content and identify possible threats.
+
+To detect potentially harmful file extensions associated with malware.
+
+To implement secure user registration and authentication.
+
+To store user information securely using database management techniques.
+
+To provide a centralized security dashboard for threat analysis.
+
+To demonstrate the integration of Artificial Intelligence, Machine Learning, and web technologies in cybersecurity applications.
+
+1.5 Scope of the Project
+
+The scope of the PhishGuard AI project focuses on providing an automated cybersecurity analysis platform for detecting common digital threats.
+
+The system provides the following features:
+
+User registration and login.
+
+Secure authentication.
+
+Security dashboard access.
+
+Phishing URL analysis.
+
+Suspicious email content analysis.
+
+Malware risk checking based on file extensions.
+
+Threat prediction and risk-level reporting.
+
+The system can be used by individuals, students, organizations, and security-aware users who need a simple method to analyse suspicious digital content.
+
+The project can be extended in the future with advanced machine learning models, real-time threat intelligence, automated malware analysis, detailed scan history, and improved prediction accuracy.
+
+LITERATURE REVIEW
+
+2.1 Introduction
+
+Cybersecurity has become an important research area due to the continuous increase in digital attacks targeting individuals, organizations, and online services. The growth of internet usage, cloud applications, and digital communication has resulted in the development of various cyber threats such as phishing attacks, malicious emails, malware distribution, and unauthorized access attempts.
+
+Recent developments in Artificial Intelligence (AI) and Machine Learning (ML) have improved cybersecurity by enabling automated threat detection and classification. AI-based systems can analyse large amounts of data, identify suspicious patterns, and provide risk predictions. These approaches help reduce manual effort and improve the speed of security analysis.
+
+The proposed PhishGuard AI system focuses on combining multiple cybersecurity analysis functions into a single web-based application. The system provides phishing URL analysis, suspicious email detection, and malware risk checking features to help users identify potential digital threats.
+
+2.2 Existing Cybersecurity Threat Detection Systems
+
+Existing cybersecurity solutions use different techniques to identify and prevent cyber-attacks. Antivirus software commonly uses signature-based detection methods to compare files against databases of known malware signatures. These systems provide effective protection against previously identified threats but may not detect newly generated malware.
+
+Email security systems are widely used to identify spam messages, phishing attempts, and malicious attachments. These systems analyse email content, sender details, message patterns, and embedded links to determine whether an email is suspicious.
+
+To overcome these limitations, modern cybersecurity applications are moving towards intelligent and automated detection methods using machine learning and data analysis techniques.
+
+2.3 Phishing Detection Systems
+
+Phishing is one of the most common cybersecurity threats where attackers create fake websites or messages to deceive users into providing confidential information. These attacks commonly target usernames, passwords, banking details, and other sensitive data.
+
+Traditional phishing detection methods mainly depend on URL blacklists and predefined rules. However, these methods have limitations because newly created phishing websites may not exist in existing databases.
+
+Machine learning-based phishing detection approaches analyse URL characteristics and website-related features to classify websites as legitimate or malicious. Features such as URL length, special characters, domain information, and suspicious keywords can be used for identifying phishing patterns.
+
+The PhishGuard AI system includes a URL analysis module that evaluates suspicious URLs and provides a phishing-risk response containing prediction results, confidence values, and risk levels.
+
+2.4 Email Threat Detection Systems
+
+Email communication is one of the most commonly used methods for spreading cyber-attacks. Attackers often use phishing emails, social engineering techniques, and malicious links to compromise user accounts.
+
+Existing email threat detection systems analyse different characteristics of emails including:
+
+Email content and keywords.
+
+Sender information.
+
+Suspicious links.
+
+Message patterns.
+
+Potential malicious indicators.
+
+Natural Language Processing (NLP) techniques can be applied to analyse email text and identify suspicious patterns. Machine learning models can also classify emails based on previously learned threat patterns.
+
+The PhishGuard AI email analysis module provides a basic threat evaluation mechanism by analysing email content and generating a security prediction with confidence information.
+
+2.5 Malware Detection Systems
+
+Malware detection systems are developed to identify software or files that may damage computer systems or compromise user security. Traditional malware detection methods rely on signature matching techniques to identify known malicious programs.
+
+Modern malware detection approaches analyse file characteristics, behavioural patterns, and suspicious indicators to improve detection accuracy. File extension analysis is also commonly used as an initial security check because certain file types are frequently associated with malicious activities.
+
+2.6 Research Gap
+
+Existing cybersecurity tools generally focus on individual security problems such as antivirus protection, phishing detection, or email filtering. Users often need multiple applications to analyse different types of threats.
+
+There is a requirement for a unified cybersecurity platform that provides multiple security analysis features through a single interface. Such a system can simplify threat identification and improve user awareness.
+
+The PhishGuard AI system addresses this research gap by integrating URL analysis, email threat detection, and malware risk checking into one web-based application. The system provides authenticated access, centralized security analysis, and a foundation for future AI-based threat detection improvements.
+
+2.7 Summary
+
+The literature review highlights the importance of automated cybersecurity solutions for detecting modern digital threats. Traditional security methods provide protection against known threats but may have limitations when dealing with new attack techniques.
+
+Artificial Intelligence and Machine Learning approaches provide opportunities for improving threat detection through automated analysis and classification. By combining cybersecurity concepts with web technologies, the PhishGuard AI system provides a centralized platform for analysing phishing URLs, suspicious emails, and potentially harmful files.
+
+The proposed system can be further enhanced in the future by integrating trained machine learning models, real-time threat intelligence, advanced malware analysis, and explainable AI-based predictions.
+
+3. METHODOLOGY
+
+3.1 Introduction
+
+The methodology of the PhishGuard AI system describes the approach followed for designing and developing a web-based cybersecurity threat detection application. The system combines web application development, database management, authentication mechanisms, and threat analysis modules to provide a centralized platform for identifying potential cyber risks.
+
+The system follows a structured approach where the frontend provides user interaction, the backend handles application logic and security operations, and the database stores user-related information securely.
+
+3.2 Proposed System
+
+The proposed PhishGuard AI system is a web-based cybersecurity application designed to detect and analyse common cyber threats through a single interface.
+
+The system consists of three major layers:
+
+Frontend Layer
+
+Backend Layer
+
+Database Layer
+
+1. Frontend Layer
+
+The frontend provides an interactive interface through which users can register, log in, access the security dashboard, and perform different security scans.
+
+The frontend allows users to:
+
+Create an account.
+
+Login securely.
+
+Access cybersecurity tools.
+
+Enter suspicious URLs.
+
+Submit email content for analysis.
+
+Check suspicious file names.
+
+View threat analysis results.
+
+2. Backend Layer
+
+The backend is developed using Python Flask and handles the core application operations.
+
+The backend is responsible for:
+
+User authentication.
+
+Session management.
+
+Processing security analysis requests.
+
+Performing URL analysis.
+
+Performing email analysis.
+
+Checking malware-related file extensions.
+
+Communicating with the database.
+
+Flask provides the required framework for developing the web application and managing different application routes.
+
+3. Database Layer
+
+The database layer uses SQLite with Flask-SQL Alchemy for storing application data.
+
+The database maintains:
+
+User information.
+
+Login credentials in hashed format.
+
+User account details.
+
+Application-related records.
+
+Password information is protected using password hashing techniques to prevent storage of plain-text passwords.
+
+3.3 System Architecture
+
+The PhishGuard AI system follows a client-server architecture.
+
+User Interface
+
+The user interacts with the application through a web browser. The interface provides registration, login, dashboard access, and security scanning options.
+
+Application Server
+
+The Flask backend receives user requests and processes security operations. It handles authentication, threat analysis logic, and communication with the database.
+
+Database
+
+SQLite stores user information and application data. Flask-SQL Alchemy provides the connection between the Flask application and the database.
+
+Threat Analysis Modules
+
+The system contains separate modules for:
+
+Phishing URL Detection.
+
+Email Threat Analysis.
+
+Malware Risk Analysis.
+
+The overall architecture can be represented as:
+
+User → Web Interface → Flask Backend → Threat Analysis Modules → SQLite Database → Result Display
+
+Technology
+
+Purpose
+
+Python
+
+Application development and security logic
+
+Flask
+
+Web application framework
+
+SQLite
+
+Database storage
+
+Flask-SQLAlchemy
+
+Database connectivity and ORM
+
+Flask-Login
+
+User authentication and session management
+
+Scikit-learn
+
+Machine learning support
+
+Pandas
+
+Data processing
+
+NumPy
+
+Numerical operations
+
+Joblib
+
+Machine learning model handling
+
+HTML/CSS/JavaScript
+
+Frontend interface development 
+
+Table 3.1: Technologies Used in the System
+
+ Figure 3.1: System Architecture of Phish Guard AI
+
+3.4 User Authentication
+
+User authentication is an important component of the PhishGuard AI system because it ensures that only authorized users can access security features.
+
+During login, the system verifies user credentials and creates an authenticated session using Flask-Login.
+
+The authentication process provides:
+
+Secure user access.
+
+Session management.
+
+Protection of user accounts.
+
+Controlled access to security features.
+
+S. No.
+
+Module
+
+Description
+
+1
+
+Authentication Module
+
+Handles user registration and login
+
+2
+
+User Management Module
+
+Stores and manages user information
+
+3
+
+URL Threat Scanner
+
+Analyzes URLs for phishing risk
+
+4
+
+Email Threat Analyzer
+
+Checks suspicious email content
+
+5
+
+Malware Risk Scanner
+
+Detects risky file extensions
+
+6
+
+Database Management
+
+Stores and retrieves application data
+
+Table 3.2: Major System Modules
+
+3.5 URL Threat Analysis Process
+
+The URL threat analysis module is designed to identify potentially harmful websites and phishing attempts.
+
+The process includes:
+
+User enters a suspicious URL.
+
+The system receives the URL input.
+
+The URL analyser processes the given information.
+
+The system generates a prediction result.
+
+Confidence value and risk level are displayed.
+
+3.6 Email Threat Analysis Process
+
+The email threat analysis module evaluates email content to identify suspicious characteristics.
+
+The process includes:
+
+User submits email text.
+
+The system analyses the provided content.
+
+The analyser checks for suspicious patterns.
+
+A prediction result is generated.
+
+Workflow:
+
+Email Content → Text Analysis → Threat Prediction → Confidence Result → Display
+
+3.7 Malware Risk Analysis Process
+
+The malware analysis module checks file names and extensions to identify potentially dangerous files.
+
+The workflow includes:
+
+User provides a file name.
+
+System extracts the file extension.
+
+Extension is compared with known risky formats.
+
+Warning level is generated.
+
+Result is displayed.
+
+Workflow:
+
+File Input → Extension Checking → Risk Evaluation → Warning Generation
+
+3.8 Data Flow
+
+The overall data flow of the PhishGuard AI system can be represented as:
+
+User → Flask Web Application → Authentication Module → Threat Analysis Modules → Database → Security Report
+
+For different analysis operations:
+
+Email Input → Email Analyzer → Prediction → Result
+
+File Input → Malware Analyzer → Risk Check → Warning
+
+Figure 3.2: System Workflow of PhishGuard AI
+
+3.9 Summary
+
+The methodology of the PhishGuard AI system combines web development, authentication, database management, and cybersecurity analysis techniques. Flask provides the application framework, SQLite manages user information, and separate threat analysis modules perform security checks.
+
+This chapter follows the same structure as your reference PDF's Methodology chapter, which includes Proposed System, Architecture, Technologies Used table, Major Modules table, Workflow, and Summary.
+
+Figure 3.3: Face Recognition Workflow
+
+4. IMPLEMENTATION
+
+4.1 Introduction
+
+The implementation phase focuses on converting the proposed methodology of the PhishGuard AI system into a functional web-based cybersecurity application. The system is implemented using Python, Flask, SQLite, Flask-SQL Alchemy, Flask-Login, and Machine Learning-related libraries.
+
+The main objective of implementation is to integrate all components into a single cybersecurity platform that allows users to analyse suspicious digital content and receive security risk information.
+
+4.2 Frontend Implementation
+
+The frontend of PhishGuard AI provides the user interface through which users interact with different security features.
+
+The interface includes:
+
+Home page.
+
+User registration page.
+
+Login page.
+
+Security dashboard.
+
+URL scanning interface.
+
+Email analysis interface.
+
+Malware risk scanning interface.
+
+Security result display.
+
+4.3 Backend Implementation
+
+The backend of the system is developed using the Flask framework in Python.
+
+The Flask application acts as the main processing layer between the user interface, database, and threat analysis modules.
+
+The backend performs the following operations:
+
+Handling user requests.
+
+Managing authentication.
+
+Processing URL analysis requests.
+
+Processing email analysis requests.
+
+Performing malware risk checking.
+
+Communicating with the database.
+
+Generating threat analysis results.
+
+Major backend components include:
+
+Authentication module.
+
+User management module.
+
+URL analyser module.
+
+Email analyser module.
+
+Malware analyser module.
+
+Database management module.
+
+4.4 Authentication Implementation
+
+Authentication is implemented to provide secure access to the PhishGuard AI application.
+
+The registration module collects user details such as:
+
+Username.
+
+Email address.
+
+Password.
+
+The authentication module provides:
+
+Secure registration.
+
+Login verification.
+
+Session management.
+
+Protected dashboard access.
+
+4.5 Database Implementation
+
+The system uses SQLite as the database for storing application information.
+
+Flask-SQL Alchemy is used as the Object Relational Mapping (ORM) tool to connect the Flask application with the database.
+
+The database stores user-related information including:
+
+Field
+
+Description
+
+User ID
+
+Unique identifier of the user
+
+Username
+
+Name of the registered user
+
+Email
+
+Registered email address
+
+Password Hash
+
+Encrypted user password
+
+Created At
+
+Date and time of account creation
+
+Table 4.1: User Information Stored in the Database
+
+4.6 URL Threat Scanner Implementation
+
+The URL threat scanner module is designed to analyse suspicious URLs and identify possible phishing risks.
+
+The implementation process includes:
+
+User enters a URL into the scanner interface.
+
+The URL data is received by the Flask backend.
+
+The analyser processes the URL information.
+
+The system generates a prediction result.
+
+Confidence value and risk level are displayed.
+
+The module provides security information such as:
+
+Prediction result.
+
+Confidence score.
+
+Risk category.
+
+The URL analyser provides a foundation for integrating advanced machine learning models in future improvements.
+
+4.7 Email Threat Detection Implementation
+
+The email threat detection module analyses email content to identify suspicious messages.
+
+The implementation process includes:
+
+User enters email content.
+
+The content is transferred to the backend.
+
+The analyser checks the input data.
+
+A prediction result is generated.
+
+The result is displayed to the user.
+
+The module provides:
+
+Email safety prediction.
+
+Confidence value.
+
+Threat indication.
+
+Workflow:
+
+Email Content → Text Analysis → Threat Detection → Confidence Result → Display
+
+4.8 Malware Risk Scanner Implementation
+
+The malware risk scanner module checks file names and extensions to identify potentially dangerous files.
+
+The implementation process includes:
+
+User enters a file name.
+
+System extracts the file extension.
+
+Extension is compared with predefined risky extensions.
+
+Risk level is generated.
+
+Warning message is displayed.
+
+Workflow:
+
+File Name Input → Extension Checking → Risk Evaluation → Warning Result
+
+4.9 Machine Learning Module Implementation
+
+The project contains dependencies required for machine learning implementation, including:
+
+Scikit-learn.
+
+Pandas.
+
+NumPy.
+
+Joblib.
+
+The machine learning module is designed to support future trained models for threat classification. The current implementation provides placeholder analysis logic for URL and email scanning. Future versions can integrate trained machine learning models to improve prediction accuracy.
+
+4.10 API and Module Communication
+
+The Flask backend manages communication between different components of the application.
+
+The communication flow is:
+
+User Interface → Flask Backend → Threat Analysis Modules → Database → Result Display
+
+The backend processes user requests, performs required analysis, stores necessary information, and returns the security result to the user interface.
+
+4.11 Summary
+
+The implementation provides a centralized cybersecurity platform and creates a foundation for future enhancements such as advanced machine learning models, real-time threat intelligence integration, and detailed security reporting.
+
+5. TESTING & DEPLOYMENT
+
+5.1 Introduction
+
+Testing is an important phase in the development of the PhishGuard AI system. It is performed to verify that all modules of the application work correctly and produce expected results. The system is tested at different levels to identify errors, verify functionality, and ensure reliable communication between the frontend, backend, database, and threat analysis modules.
+
+5.2 Testing Objectives
+
+The main objectives of testing are:
+
+To verify that all major system functionalities work correctly.
+
+To identify and remove errors during development.
+
+To verify user registration and login functionality.
+
+To ensure secure database operations.
+
+To verify URL threat analysis functionality.
+
+To verify email threat detection functionality.
+
+To verify malware risk scanning functionality.
+
+To ensure proper communication between application modules.
+
+To check whether accurate security results are displayed.
+
+5.3 Functional Testing
+
+Functional testing is performed to verify whether the system works according to the specified requirements.
+
+The following test cases are performed:
+
+Test Case 1: User Registration
+
+Input:Valid username, email, and password.
+
+Expected Result:A new user account should be created successfully.
+
+Result:Passed.
+
+Test Case 2: User Login
+
+Input:Registered email and correct password.
+
+Expected Result:The user should be authenticated and redirected to the security dashboard.
+
+Result:Passed.
+
+Test Case 3: Invalid Login
+
+Input:Incorrect email or password.
+
+Expected Result:The system should display an appropriate login error message.
+
+Result:Passed.
+
+Test Case 4: URL Threat Scanner
+
+Input:A suspicious or valid URL.
+
+Expected Result:The system should analyse the URL and display prediction, confidence value, and risk level.
+
+Result:Passed.
+
+Test Case 5: Email Threat Detection
+
+Input:Email content containing suspicious or normal text.
+
+Expected Result:The system should analyse the email and provide a security prediction.
+
+Result:Passed
+
+Test Case 6: Malware Risk Scanner
+
+Input:A file name with a risky extension.
+
+Expected Result:The system should identify potentially dangerous extensions and display a warning.
+
+Result:Passed.
+
+Test Case ID
+
+Test Case
+
+Expected Result
+
+TC01
+
+User Registration
+
+User account should be created successfully
+
+TC02
+
+User Login
+
+Valid user should log in successfully
+
+TC03
+
+Invalid Login
+
+Error message should be displayed
+
+TC04
+
+URL Threat Scanner
+
+URL risk analysis should be generated
+
+TC05
+
+Email Threat Detection
+
+Email security result should be displayed
+
+TC06
+
+Malware Risk Scanner
+
+Dangerous file extension should be detected
+
+TC07
+
+Database Operation
+
+User information should be stored and retrieved
+
+TC08
+
+Security Report Generation
+
+Threat analysis result should be displayed
+
+Table 5.1: Functional Test Cases
+
+5.4 Integration Testing
+
+Integration testing verifies the communication between different components of the PhishGuard AI system.
+
+The following integrations are tested:
+
+Flask application with SQLite database.
+
+Flask backend with authentication module.
+
+User interface with threat analysis modules.
+
+URL scanner with result generation.
+
+Email analyser with prediction output.
+
+Malware scanner with risk evaluation.
+
+Database Testing
+
+Database testing is performed to ensure that user information is stored and retrieved correctly.
+
+Email information.
+
+Password hash storage.
+
+User authentication details.
+
+Database connectivity.
+
+The successful retrieval of user information confirms that SQLite database operations are functioning correctly.
+
+5.6 Security Testing
+
+Security testing is performed to verify that the application protects user information and provides secure access.
+
+The following security aspects are tested:
+
+Password hashing using Werkzeug security.
+
+Authentication-based dashboard access.
+
+Protection against unauthorized access.
+
+Secure user session management.
+
+Deployment
+
+During development, the PhishGuard AI application is executed in a local environment.
+
+The deployment environment includes:
+
+Python runtime environment.
+
+Flask web server.
+
+SQLite database.
+
+Required Python libraries.
+
+The local deployment allows complete testing of:
+
+User authentication.
+
+Threat scanning modules.
+
+Database operations.
+
+Result generation.
+
+After successful testing, the system can be deployed on cloud platforms for public access.
+
+5.8 Testing Results
+
+The major modules of the PhishGuard AI application were tested individually and together.
+
+Successful user registration.
+
+Successful login authentication.
+
+Database connectivity.
+
+URL analysis operation.
+
+Email threat analysis operation.
+
+Malware risk detection.
+
+Result display functionality.
+
+6. RESULTS AND DISCUSSION
+
+6.1 Introduction
+
+The PhishGuard AI system was developed and tested to evaluate its ability to detect and analyse cybersecurity threats. The application integrates user authentication, database management, URL threat analysis, email threat detection, and malware risk scanning into a single web-based platform.
+
+The results demonstrate that the major functionalities of the system such as user registration, login authentication, phishing URL scanning, email analysis, malware risk detection, and security report generation can be performed successfully.
+
+6.2 User Registration Result
+
+The registration module allows new users to create an account by providing required details such as username, email address, and password.
+
+After entering valid information, the system stores user details securely in the database. Passwords are stored using hashing techniques to improve security.
+
+Result:User registration functionality was successfully implemented and tested.
+
+(Keep screenshot of registration page here)
+
+Figure 6.1: User Registration Interface
+
+6.3 User Login Result
+
+The login module verifies registered user credentials and provides authenticated access to the PhishGuard AI dashboard.
+
+After successful authentication, the user can access different cybersecurity analysis modules.
+
+Result:Login functionality was successfully verified.
+
+(Keep screenshot of login page showing successful login/dashboard access here)
+
+Figure 6.2: Successful User Login Interface
+
+6.4 URL Threat Scanner Result
+
+The URL threat scanner analyses user-provided URLs to identify possible phishing risks.
+
+The system accepts a URL as input and generates a security response containing prediction information, confidence value, and risk level.
+
+Result:The URL threat scanner successfully analysed URL inputs and generated phishing-risk results.
+
+(Keep screenshot showing URL input box + scan button + result output here)
+
+Figure 6.3: URL Threat Scanner Interface
+
+6.5 Email Threat Detection Result
+
+The email threat detection module analyses email content to identify suspicious messages.
+
+The user provides email text as input, and the system processes the content to generate a security prediction.
+
+Result:The email analysis module successfully generated email security predictions.
+
+(Keep screenshot showing email text area + scan button + prediction result here)
+
+Figure 6.4: Email Threat Detection Interface
+
+6.6 Malware Risk Scanner Result
+
+The malware risk scanner checks file names and extensions to identify potentially dangerous files.
+
+Result:The malware risk scanner successfully identified risky file extensions.
+
+(Keep screenshot showing file name input + malware risk warning result here)
+
+Figure 6.5: Malware Risk Scanner Interface
+
+6.7 Security Reports Result
+
+The security report interface displays the final results generated by the threat analysis modules.
+
+The report provides users with information about detected risks and analysis outcomes.
+
+Result:The system successfully displayed threat analysis reports in a structured format.
+
+(Keep screenshot showing final security report/result page here)
+
+Figure 6.6: Security Reports Interface
+
+6.8 Functional Results
+
+The major functionalities of the PhishGuard AI system were tested during development.
+
+S. No.
+
+Functionality
+
+Expected Result
+
+Result
+
+1
+
+User Registration
+
+User account should be created successfully
+
+Passed
+
+2
+
+User Login
+
+Valid user should log in successfully
+
+Passed
+
+3
+
+Database Connection
+
+User information should be stored and retrieved
+
+Passed
+
+4
+
+URL Threat Scanner
+
+Phishing risk analysis should be generated
+
+Passed
+
+5
+
+Email Threat Detection
+
+Email security prediction should be displayed
+
+Passed
+
+6
+
+Malware Risk Scanner
+
+Dangerous file extension should be detected
+
+Passed
+
+7
+
+Security Report Generation
+
+Analysis result should be displayed
+
+Passed 
+
+Table 6.1: Functional Testing Results
+
+6.9 Discussion
+
+The developed PhishGuard AI system demonstrates the practical application of cybersecurity concepts with web technologies. The integration of Flask, SQLite, authentication mechanisms, and threat analysis modules provides a centralized platform for analysing suspicious digital content.
+
+The system reduces manual effort by allowing users to check URLs, emails, and files through a single application interface.
+
+However, the current implementation has limitations. The accuracy of threat prediction depends on the analysis logic and available training data. Future improvements can include advanced machine learning models, real-time threat intelligence integration, improved malware analysis, and explainable AI-based predictions.
+
+6.10 Summary
+
+The results show that the PhishGuard AI system successfully implements the required cybersecurity features. User authentication, database operations, URL analysis, email analysis, malware risk checking, and report generation were tested successfully.
+
+The system provides a foundation for developing an advanced AI-powered cybersecurity platform with improved detection accuracy and additional security features.
+
+7. CONCLUSION AND FUTURE SCOPE
+
+7.1 Conclusion
+
+The PhishGuard AI system was developed to provide an automated and centralized approach for detecting common cybersecurity threats. The project combines web application development, authentication mechanisms, database management, and threat analysis techniques to create a user-friendly cybersecurity platform.
+
+The system provides multiple security analysis features including phishing URL detection, suspicious email analysis, and malware risk checking. By integrating these modules into a single application, users can analyse different types of suspicious digital content without depending on multiple security tools.
+
+The URL threat scanner provides phishing-risk information with prediction results, confidence values, and risk levels. The email threat detection module analyses email content and provides security predictions. The malware scanner checks suspicious file extensions and generates warnings for potentially harmful file types.
+
+The project demonstrates how Artificial Intelligence concepts, Machine Learning support libraries, and web technologies can be combined to develop a practical cybersecurity solution. The system provides a foundation for improving digital security awareness and assisting users in identifying potential cyber threats.
+
+7.2 Limitations
+
+Although the PhishGuard AI system provides an integrated cybersecurity analysis platform, certain limitations exist:
+
+The current URL and email analysis modules use basic analysis logic and require trained machine learning models for improved accuracy.
+
+The system does not perform complete malware file scanning or behavioural analysis.
+
+Threat detection accuracy depends on the quality of available datasets and analysis methods.
+
+The current system is mainly designed as a web-based application.
+
+Real-time threat intelligence integration is not included in the current implementation.
+
+The system requires further testing with large-scale cybersecurity datasets.
+
+7.3 Future Scope
+
+The PhishGuard AI system can be enhanced in the future by adding advanced cybersecurity features and intelligent analysis methods.
+
+1. Machine Learning-Based Threat Detection
+
+The system can be improved by integrating trained machine learning models for URL and email classification. These models can learn from large cybersecurity datasets and improve prediction accuracy.
+
+2. Real-Time Threat Intelligence Integration
+
+External threat intelligence services can be integrated to provide updated information about malicious domains, phishing websites, and known cyber threats.
+
+3. Advanced Malware Analysis
+
+Future versions can include advanced malware detection techniques such as:
+
+File behaviour analysis.
+
+Virus database integration.
+
+Automated malware classification.
+
+4. Scan History and Reports
+
+A history module can be added to store previous security scans and allow users to review:
+
+Previous URL scans.
+
+Email analysis results.
+
+Malware detection reports.
+
+5. Explainable AI Integration
+
+Explainable AI techniques can be implemented to provide users with reasons behind threat predictions and improve trust in the system.
+
+6. Mobile Application Support
+
+A mobile application can be developed to allow users to perform cybersecurity checks using smartphones.
+
+7. Cloud Deployment
+
+The application can be deployed on cloud platforms to provide remote access, better scalability, and improved availability.
+
+7.4 Final Summary
+
+The PhishGuard AI system provides a practical solution for detecting and analysing cybersecurity threats through a single web-based platform. The integration of authentication, database management, and threat analysis modules creates an efficient approach for identifying suspicious digital content.
+
+REFERENCES
+
+Flask Documentation, Flask – A Python Web Framework for Developing Web Applications.Available at: https://flask.palletsprojects.com/
+
+Python Documentation, Python Programming Language Documentation.Available at: https://docs.python.org/
+
+SQLite Documentation, SQLite – Lightweight Relational Database Management System.Available at: https://www.sqlite.org/docs.html/
+
+SQL Alchemy Documentation, SQL Alchemy – Python SQL Toolkit and Object Relational Mapper.Available at: https://www.sqlalchemy.org/
+
+Flask-Login Documentation, User Session Management and Authentication for Flask Applications.Available at: https://flask-login.readthedocs.io/
+
+Scikit-learn Documentation, Machine Learning Library for Python.Available at: https://scikit-learn.org/
+
+Pandas Documentation, Data Analysis and Data Processing Library.Available at: https://pandas.pydata.org/
+
+NumPy Documentation, Numerical Computing Library for Python.Available at: https://numpy.org/
+
+OWASP Foundation, OWASP Top 10 Web Application Security Risks.Available at: https://owasp.org/www-project-top-ten/
+
+CISA (Cybersecurity and Infrastructure Security Agency), Cybersecurity Resources and Threat Information.Available at: https://www.cisa.gov/
+
+NIST Cybersecurity Framework, National Institute of Standards and Technology – Cybersecurity Guidelines.Available at: https://www.nist.gov/cyberframework
+
+MITRE ATT&CK Framework, Knowledge Base of Cyber Adversary Tactics and Techniques.Available at: https://attack.mitre.org/
+
+Joblib Documentation, Python Library for Saving and Loading Machine Learning Models.Available at: https://joblib.readthedocs.io/
+
+MDN Web Documentation, HTML, CSS, JavaScript and Web Development Technologies.Available at: https://developer.mozilla.org/

@@ -1,0 +1,38 @@
+digraph Existing {
+  rankdir=TB; bgcolor=white; nodesep=0.4; ranksep=0.7; compound=true;
+  node [shape=box, style="rounded,filled", fontname="Helvetica", fontsize=11, margin="0.20,0.13"];
+  edge [color="#333333"];
+
+  subgraph cluster_ex {
+    label="EXISTING APPROACHES";
+    fontname="Helvetica-Bold"; fontsize=13; color="#b91c1c"; style="rounded"; penwidth=1.8; margin=16;
+    E1 [label="Manual reading &\nCtrl-F keyword search\n\n— exact-match only\n— no explanation\n— slow over 100+ pages", fillcolor="#fee2e2"];
+    E2 [label="General chatbots\n(ChatGPT, Gemini)\n\n— not grounded in the\n   student's own material\n— can hallucinate facts\n— no source citation", fillcolor="#fee2e2"];
+    E3 [label="Cloud notebook tools\n(e.g. NotebookLM)\n\n— account and internet required\n— no self-hosting\n— fixed feature set\n— data leaves the device", fillcolor="#fee2e2"];
+    E4 [label="Manual study-aid creation\n(notes, quizzes, slides)\n\n— hours of effort per unit\n— not repeatable\n— coverage depends on\n   the student", fillcolor="#fee2e2"];
+  }
+
+  subgraph cluster_gap {
+    label="RESEARCH GAP";
+    fontname="Helvetica-Bold"; fontsize=13; color="#a16207"; style="rounded"; penwidth=1.8; margin=14;
+    GAP [label="No single self-hostable workspace that grounds every answer in the student's own\ndocuments, cites the source, and derives study aids from the same indexed content.", fillcolor="#fef3c7", fontsize=12];
+  }
+
+  subgraph cluster_prop {
+    label="PROPOSED SYSTEM  —  AI STUDY ASSISTANT USING RAG";
+    fontname="Helvetica-Bold"; fontsize=13; color="#15803d"; style="rounded"; penwidth=1.8; margin=16;
+    P1 [label="Semantic retrieval over\nthe student's own documents\n(RAG, top-k cosine)", fillcolor="#dcfce7"];
+    P2 [label="Every answer cites the\nsource document it came from", fillcolor="#dcfce7"];
+    P3 [label="Quiz, mind map and slide deck\nderived from the same index", fillcolor="#dcfce7"];
+    P4 [label="Self-hosted stack:\nlocal SQLite, local ChromaDB,\nconfigurable model provider", fillcolor="#dcfce7"];
+  }
+
+  E1 -> GAP [lhead=cluster_gap];
+  E2 -> GAP [lhead=cluster_gap];
+  E3 -> GAP [lhead=cluster_gap];
+  E4 -> GAP [lhead=cluster_gap];
+  GAP -> P1 [ltail=cluster_gap];
+  GAP -> P2 [ltail=cluster_gap];
+  GAP -> P3 [ltail=cluster_gap];
+  GAP -> P4 [ltail=cluster_gap];
+}

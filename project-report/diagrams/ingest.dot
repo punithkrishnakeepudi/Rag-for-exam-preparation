@@ -1,0 +1,17 @@
+digraph Ingest {
+  rankdir=TB; bgcolor=white; nodesep=0.25; ranksep=0.42;
+  node [shape=box, style="rounded,filled", fillcolor="#ccfbf1", fontname="Helvetica", fontsize=12, margin="0.24,0.13", width=4.4];
+  edge [fontname="Helvetica", fontsize=10, color="#333333"];
+
+  A [label="Student selects a PDF / DOCX / TXT / MD file\nor pastes a web page URL", fillcolor="#e0e7ff"];
+  B [label="POST /api/notebooks/{id}/documents\nDocument row inserted with chunk_count = 0", fillcolor="#e0e7ff"];
+  C [label="FastAPI background task starts\n(upload response returns immediately)", fillcolor="#fef9c3"];
+  D [label="Text extraction\nPyMuPDF (pdf) · python-docx (docx)\nplain read (txt/md) · trafilatura (url)"];
+  E [label="Word-based chunking\n256 words per chunk, 32-word overlap"];
+  F [label="Batch embedding request to the embedding model\none vector per chunk", fillcolor="#fde68a"];
+  G [label="ChromaDB upsert into collection notebook_{id}\nid · vector · chunk text · metadata", shape=cylinder, fillcolor="#fef3c7"];
+  H [label="chunk_count committed to SQLite\nUI stops polling and unlocks Chat / Quiz / Map / Slides", fillcolor="#dcfce7"];
+  I [label="Summary pass: 3–5 sentence abstract of the first 3000 characters\ncommitted to document.summary", fillcolor="#dcfce7"];
+
+  A -> B -> C -> D -> E -> F -> G -> H -> I;
+}

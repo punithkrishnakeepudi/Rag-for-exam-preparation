@@ -2,7 +2,7 @@
 
 **Local, open-source alternative to NotebookLM — runs 100% on your machine.**
 
-Upload your lecture notes, textbooks, or research papers and instantly get: streaming RAG chat with citations, auto-generated summaries, MCQ quizzes, interactive mind maps, and exportable slide decks — all powered by Ollama with no cloud API keys required.
+Upload your lecture notes, textbooks, or research papers and instantly get: streaming RAG chat with citations, auto-generated summaries, MCQ quizzes, interactive mind maps, and exportable slide decks — powered by configurable OpenRouter models and embeddings.
 
 > Built as a college mini-project. Works offline. Your data never leaves your machine.
 
@@ -29,7 +29,7 @@ Upload your lecture notes, textbooks, or research papers and instantly get: stre
 - [FastAPI](https://fastapi.tiangolo.com/) — REST API + Server-Sent Events (SSE) streaming
 - [ChromaDB](https://www.trychroma.com/) — local vector store for semantic search
 - [SQLite](https://www.sqlite.org/) via [SQLModel](https://sqlmodel.tiangolo.com/) — persistent storage for notebooks, documents, chat history
-- [Ollama](https://ollama.com/) — local LLM inference (`qwen2.5`) and embeddings (`nomic-embed-text`)
+- [OpenRouter](https://openrouter.ai/docs/api_reference/overview) — routed LLM generation and embeddings
 - [PyMuPDF](https://pymupdf.readthedocs.io/) · [python-docx](https://python-docx.readthedocs.io/) · [trafilatura](https://trafilatura.readthedocs.io/) — document parsers
 
 **Frontend**
@@ -44,18 +44,13 @@ Upload your lecture notes, textbooks, or research papers and instantly get: stre
 
 Install these before anything else:
 
-1. **[Ollama](https://ollama.com/download)** — local LLM runtime
+1. **[OpenRouter](https://openrouter.ai/keys)** — API key and model access
 2. **Python ≥ 3.10**
 3. **Node.js ≥ 18**
 
-After installing Ollama, pull the two required models:
+Create an OpenRouter API key, then set `OPENROUTER_MODEL` and `OPENROUTER_EMBED_MODEL` in `backend/.env`. Model IDs must include the provider prefix, such as `openai/gpt-4o-mini`.
 
-```bash
-ollama pull qwen2.5
-ollama pull nomic-embed-text
-```
-
-> **Low RAM?** Use `qwen2.5:1.5b` or `qwen2.5:3b` instead — edit `MODEL_NAME` in `.env` after setup.
+> **Privacy note:** OpenRouter sends prompts, retrieved document chunks, and embeddings to the selected upstream provider. Do not upload sensitive material unless your institution permits it.
 
 ---
 
@@ -119,9 +114,12 @@ All settings live in `backend/.env` (copied from `.env.example`):
 
 | Variable | Default | Description |
 |---|---|---|
-| `MODEL_NAME` | `qwen2.5` | Ollama model used for generation. Try `qwen2.5:1.5b` on low-RAM machines |
-| `EMBED_MODEL` | `nomic-embed-text` | Ollama model used for embeddings |
-| `OLLAMA_BASE_URL` | `http://localhost:11434` | Ollama server URL |
+| `OPENROUTER_MODEL` | `openai/gpt-4o-mini` | OpenRouter generation model ID |
+| `OPENROUTER_EMBED_MODEL` | `openai/text-embedding-3-small` | OpenRouter embedding model ID |
+| `OPENROUTER_BASE_URL` | `https://openrouter.ai/api/v1` | OpenRouter API base URL |
+| `OPENROUTER_API_KEY` | unset | Required API key (keep out of source control) |
+| `OPENROUTER_APP_NAME` | `StudyLens` | Optional app attribution title |
+| `OPENROUTER_HTTP_REFERER` | unset | Optional app attribution URL |
 | `CHROMA_PATH` | `./data/chroma` | Where ChromaDB stores the vector index |
 | `DB_URL` | `sqlite:///./data/studylens.db` | SQLite database path |
 | `UPLOAD_PATH` | `./data/uploads` | Where uploaded files are stored |
@@ -164,7 +162,7 @@ The model (~2 GB) downloads automatically on first use.
 │       ├── config.py            # env-based settings
 │       ├── db.py                # SQLite models: Notebook, Document, Message
 │       ├── chroma.py            # ChromaDB collection helpers
-│       ├── ollama.py            # embed + generate + streaming wrapper
+│       ├── openrouter.py       # embeddings + generation + streaming wrapper
 │       ├── ingest.py            # PDF / DOCX / TXT / URL parsers + chunker
 │       └── prompts.py           # all LLM prompt templates
 │
@@ -214,17 +212,11 @@ Interactive API docs available at [http://localhost:8000/docs](http://localhost:
 
 ## Troubleshooting
 
-**Ollama not responding**
-```bash
-ollama serve   # start the Ollama daemon if it's not running
-ollama list    # verify qwen2.5 and nomic-embed-text are pulled
-```
+**OpenRouter not responding**
+Check that `OPENROUTER_API_KEY` is set, the selected model IDs are valid on OpenRouter, and your account has credits or access to the chosen models.
 
 **Slow responses / timeouts**
-Switch to a smaller model in `.env`:
-```
-MODEL_NAME=qwen2.5:1.5b
-```
+Choose a faster OpenRouter model, reduce `RAG_TOP_K`, or reduce the requested quiz count.
 
 **ChromaDB / SQLite errors on first run**
 The backend creates `backend/data/` directories automatically on startup. If you see permission errors, make sure you're running from inside the `backend/` directory.
@@ -247,3 +239,13 @@ Bug reports and feature requests are welcome via [GitHub Issues](https://github.
 ## License
 
 MIT — do whatever you want with it.
+
+## OpenRouter migration notes
+
+The old Ollama client has been replaced by `backend/src/studylens/openrouter.py`. The client covers:
+
+- `POST /chat/completions` for summaries and streamed chat, quizzes, slides, and mind maps
+- `POST /embeddings` for document and query vectors
+- OpenRouter JSON mode for structured slide output
+
+Changing `OPENROUTER_EMBED_MODEL` changes the vector dimension or embedding space. Delete `backend/data/chroma/` and re-upload documents after changing the embedding model; otherwise old and new vectors may be incompatible.

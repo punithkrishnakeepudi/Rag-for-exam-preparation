@@ -1,8 +1,19 @@
 import os
+from pathlib import Path
 
-OLLAMA_BASE_URL = os.getenv("OLLAMA_BASE_URL", "http://localhost:11434")
-MODEL_NAME = os.getenv("MODEL_NAME", "qwen2.5")
-EMBED_MODEL = os.getenv("EMBED_MODEL", "nomic-embed-text")
+from dotenv import load_dotenv
+
+
+# Load the backend-local environment file when the app is started from any cwd.
+load_dotenv(Path(__file__).resolve().parents[2] / ".env")
+
+
+OPENROUTER_BASE_URL = os.getenv("OPENROUTER_BASE_URL", "https://openrouter.ai/api/v1").rstrip("/")
+OPENROUTER_API_KEY = os.getenv("OPENROUTER_API_KEY", "")
+OPENROUTER_MODEL = os.getenv("OPENROUTER_MODEL", "openai/gpt-4o-mini")
+OPENROUTER_EMBED_MODEL = os.getenv("OPENROUTER_EMBED_MODEL", "openai/text-embedding-3-small")
+OPENROUTER_HTTP_REFERER = os.getenv("OPENROUTER_HTTP_REFERER", "")
+OPENROUTER_APP_NAME = os.getenv("OPENROUTER_APP_NAME", "StudyLens")
 CHROMA_PATH = os.getenv("CHROMA_PATH", "./data/chroma")
 DB_URL = os.getenv("DB_URL", "sqlite:///./data/studylens.db")
 UPLOAD_PATH = os.getenv("UPLOAD_PATH", "./data/uploads")

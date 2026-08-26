@@ -1,0 +1,50 @@
+digraph ER {
+  rankdir=LR; bgcolor=white; nodesep=0.6; ranksep=1.5;
+  node [shape=plaintext, fontname="Helvetica", fontsize=11];
+  edge [fontname="Helvetica", fontsize=10, color="#333333"];
+
+  notebook [label=<
+    <TABLE BORDER="1" CELLBORDER="0" CELLSPACING="0" CELLPADDING="6" BGCOLOR="white">
+      <TR><TD COLSPAN="2" BGCOLOR="#4f46e5"><FONT COLOR="white"><B>notebook</B></FONT></TD></TR>
+      <TR><TD ALIGN="LEFT"><B>id</B>  (PK)</TD><TD ALIGN="LEFT">INTEGER</TD></TR>
+      <TR><TD ALIGN="LEFT">name</TD><TD ALIGN="LEFT">TEXT</TD></TR>
+      <TR><TD ALIGN="LEFT">created_at</TD><TD ALIGN="LEFT">DATETIME</TD></TR>
+    </TABLE>>];
+
+  document [label=<
+    <TABLE BORDER="1" CELLBORDER="0" CELLSPACING="0" CELLPADDING="6" BGCOLOR="white">
+      <TR><TD COLSPAN="2" BGCOLOR="#0d9488"><FONT COLOR="white"><B>document</B></FONT></TD></TR>
+      <TR><TD ALIGN="LEFT"><B>id</B>  (PK)</TD><TD ALIGN="LEFT">INTEGER</TD></TR>
+      <TR><TD ALIGN="LEFT"><I>notebook_id</I>  (FK)</TD><TD ALIGN="LEFT">INTEGER</TD></TR>
+      <TR><TD ALIGN="LEFT">name</TD><TD ALIGN="LEFT">TEXT</TD></TR>
+      <TR><TD ALIGN="LEFT">source_type</TD><TD ALIGN="LEFT">TEXT  (pdf/docx/txt/url)</TD></TR>
+      <TR><TD ALIGN="LEFT">source_ref</TD><TD ALIGN="LEFT">TEXT  (path or URL)</TD></TR>
+      <TR><TD ALIGN="LEFT">summary</TD><TD ALIGN="LEFT">TEXT  (nullable)</TD></TR>
+      <TR><TD ALIGN="LEFT">chunk_count</TD><TD ALIGN="LEFT">INTEGER</TD></TR>
+      <TR><TD ALIGN="LEFT">created_at</TD><TD ALIGN="LEFT">DATETIME</TD></TR>
+    </TABLE>>];
+
+  message [label=<
+    <TABLE BORDER="1" CELLBORDER="0" CELLSPACING="0" CELLPADDING="6" BGCOLOR="white">
+      <TR><TD COLSPAN="2" BGCOLOR="#b45309"><FONT COLOR="white"><B>message</B></FONT></TD></TR>
+      <TR><TD ALIGN="LEFT"><B>id</B>  (PK)</TD><TD ALIGN="LEFT">INTEGER</TD></TR>
+      <TR><TD ALIGN="LEFT"><I>notebook_id</I>  (FK)</TD><TD ALIGN="LEFT">INTEGER</TD></TR>
+      <TR><TD ALIGN="LEFT">role</TD><TD ALIGN="LEFT">TEXT  (user/assistant)</TD></TR>
+      <TR><TD ALIGN="LEFT">content</TD><TD ALIGN="LEFT">TEXT</TD></TR>
+      <TR><TD ALIGN="LEFT">sources_json</TD><TD ALIGN="LEFT">TEXT  (JSON array)</TD></TR>
+      <TR><TD ALIGN="LEFT">created_at</TD><TD ALIGN="LEFT">DATETIME</TD></TR>
+    </TABLE>>];
+
+  chroma [label=<
+    <TABLE BORDER="1" CELLBORDER="0" CELLSPACING="0" CELLPADDING="6" BGCOLOR="#fffbeb">
+      <TR><TD COLSPAN="2" BGCOLOR="#a16207"><FONT COLOR="white"><B>ChromaDB collection  "notebook_{id}"</B></FONT></TD></TR>
+      <TR><TD ALIGN="LEFT">id</TD><TD ALIGN="LEFT">doc{doc_id}_chunk{i}</TD></TR>
+      <TR><TD ALIGN="LEFT">embedding</TD><TD ALIGN="LEFT">FLOAT[ ]  (cosine space)</TD></TR>
+      <TR><TD ALIGN="LEFT">document</TD><TD ALIGN="LEFT">chunk text</TD></TR>
+      <TR><TD ALIGN="LEFT">metadata</TD><TD ALIGN="LEFT">doc_id · doc_name · chunk_idx</TD></TR>
+    </TABLE>>];
+
+  notebook -> document [label="  1 : N  ", arrowhead=crow, dir=forward];
+  notebook -> message  [label="  1 : N  ", arrowhead=crow, dir=forward];
+  document -> chroma   [label="  1 : N chunks  ", style=dashed, arrowhead=crow, dir=forward];
+}

@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>Convolutional Neural Networks</title>
+<style>
+:root{--bg:#030712;--surface:#0f172a;--border:#1e3a5f;--accent:#6366f1;--text:#f1f5f9;--sub:#94a3b8;--muted:#475569}
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:var(--bg);color:var(--text);font-family:system-ui,sans-serif;height:100vh;display:flex;flex-direction:column;overflow:hidden}
+header{display:flex;align-items:center;justify-content:space-between;padding:12px 24px;border-bottom:1px solid var(--border);flex-shrink:0}
+header h1{font-size:.9rem;color:var(--accent);font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.progress-bar{height:3px;background:var(--border)}
+.progress-fill{height:100%;background:var(--accent);transition:width .3s}
+.slide-wrap{flex:1;position:relative;overflow:hidden}
+.slide{display:none;position:absolute;inset:0}
+.slide.active{display:flex;flex-direction:column}
+/* Title_Slide */
+.layout-Title_Slide{align-items:center;justify-content:center;text-align:center;padding:4rem}
+.layout-Title_Slide h2{font-size:2.5rem;font-weight:700;color:#fff;line-height:1.2;margin:.75rem 0}
+.layout-Title_Slide .sub{font-size:1.2rem;color:var(--accent)}
+.layout-Title_Slide .bar{width:3rem;height:.25rem;background:var(--accent);border-radius:9px;margin:.5rem auto}
+/* Standard_Bullets */
+.layout-Standard_Bullets{padding:3rem 3.5rem;gap:2rem}
+.layout-Standard_Bullets h2{font-size:1.6rem;font-weight:700;color:#c7d2fe;border-bottom:1px solid var(--border);padding-bottom:.75rem}
+.layout-Standard_Bullets ul{list-style:none;display:flex;flex-direction:column;gap:.9rem;flex:1}
+.layout-Standard_Bullets li{display:flex;gap:.75rem;font-size:1rem;color:#e2e8f0}
+.layout-Standard_Bullets li::before{content:"→";color:var(--accent);flex-shrink:0}
+/* Split_Metrics */
+.layout-Split_Metrics{display:grid;grid-template-columns:1fr 1fr;gap:1.5rem;padding:2.5rem}
+.split-left{display:flex;flex-direction:column;gap:1.25rem}
+.split-left h2{font-size:1.5rem;font-weight:700;color:#c7d2fe}
+.metric-card{background:rgba(99,102,241,.12);border:1px solid rgba(99,102,241,.3);border-radius:.75rem;padding:.75rem 1rem;font-size:.9rem;color:#e2e8f0}
+.split-right{display:flex;align-items:center;justify-content:center}
+.asset-img{width:100%;max-height:240px;object-fit:cover;border-radius:.75rem}
+.asset-placeholder{width:100%;height:200px;border-radius:.75rem;background:linear-gradient(135deg,#1e1b4b,#312e81);border:1px solid var(--border)}
+/* Visual_Hero */
+.layout-Visual_Hero{position:relative;overflow:hidden}
+.hero-bg{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;opacity:.3}
+.hero-grad{position:absolute;inset:0;background:linear-gradient(to top,rgba(0,0,0,.85) 0%,rgba(0,0,0,.2) 60%,transparent 100%)}
+.hero-content{position:relative;display:flex;flex-direction:column;justify-content:flex-end;height:100%;padding:3rem;gap:1rem}
+.hero-content h2{font-size:2rem;font-weight:700;color:#fff;line-height:1.2}
+.hero-content p{font-size:1.1rem;color:#c7d2fe}
+/* Notes */
+.notes-bar{flex-shrink:0;border-top:1px solid var(--border);background:rgba(15,23,42,.9);padding:.75rem 1.5rem;display:none}
+.notes-bar.visible{display:block}
+.notes-bar p{font-size:.8rem;color:var(--sub);font-style:italic}
+.notes-label{font-size:.65rem;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;margin-bottom:.25rem}
+/* Nav */
+nav{display:flex;align-items:center;justify-content:space-between;padding:10px 24px;border-top:1px solid var(--border);flex-shrink:0}
+nav button{background:rgba(99,102,241,.15);border:1px solid var(--accent);color:#c7d2fe;padding:6px 18px;border-radius:8px;cursor:pointer;font-size:.85rem;transition:background .2s}
+nav button:hover{background:rgba(99,102,241,.35)}
+nav button:disabled{opacity:.3;cursor:default}
+.dots{display:flex;gap:6px;align-items:center}
+.dot{width:6px;height:6px;border-radius:50%;background:var(--muted);cursor:pointer;border:none;transition:background .2s}
+.dot.active{background:var(--accent)}
+.key-hint{font-size:.65rem;color:var(--muted)}
+</style>
+</head>
+<body>
+<header>
+  <h1>Convolutional Neural Networks</h1>
+  <span class="key-hint">← → navigate · N toggle notes</span>
+</header>
+<div class="progress-bar"><div class="progress-fill" id="prog"></div></div>
+<div class="slide-wrap" id="wrap"></div>
+<nav>
+  <button id="prevBtn" onclick="go(-1)">◀ Prev</button>
+  <div class="dots" id="dots"></div>
+  <button id="nextBtn" onclick="go(1)">Next ▶</button>
+</nav>
+<script>
+const SLIDES=[{"slide_number":1,"layout_type":"Title_Slide","title":"Convolutional Neural Networks","bullets":[],"speaker_notes":"","asset_generation_prompt":"Neural network icon with convolutional filters","_b64":null},{"slide_number":2,"layout_type":"Standard_Bullets","title":"Introduction","bullets":["CNNs: Part of ML series","Learn features via filter optimization","De-facto standard in computer vision","Prevent vanishing/exploding gradients"],"speaker_notes":"","asset_generation_prompt":"Neural network icon with layers","_b64":null},{"slide_number":3,"layout_type":"Split_Metrics","title":"Feature Extraction","bullets":["100x100 image: 10,000 weights","5x5 tile: 25 weights"],"speaker_notes":"","asset_generation_prompt":"Graph showing weight reduction","_b64":null},{"slide_number":4,"layout_type":"Standard_Bullets","title":"Applications","bullets":["Image and video recognition","Recommender systems","Image classification","Image segmentation","Medical image analysis","Natural language processing","Brain–computer interfaces","Financial time series"],"speaker_notes":"","asset_generation_prompt":"Icon of various applications","_b64":null},{"slide_number":5,"layout_type":"Standard_Bullets","title":"Architectural Details","bullets":["Input layer, hidden layers, output layer","Hidden layers: Convolution operations","Dot product of convolution kernel","Frobenius product for efficiency"],"speaker_notes":"","asset_generation_prompt":"Neural network icon with convolutional layers","_b64":null},{"slide_number":6,"layout_type":"Standard_Bullets","title":"Inspiration","bullets":["Biological processes","Visual cortex","Receptive fields","Overlapping fields of view"],"speaker_notes":"","asset_generation_prompt":"Neuron network icon with visual cortex reference","_b64":null},{"slide_number":7,"layout_type":"Standard_Bullets","title":"Advantages","bullets":["Less pre-processing required","Automated learning of filters","Efficiency and scalability","Overcomes human-intervention bottlenecks"],"speaker_notes":"","asset_generation_prompt":"Icon showing automated learning","_b64":null},{"slide_number":8,"layout_type":"Standard_Bullets","title":"Regularization Techniques","bullets":["Penalizing parameters (weight decay)","Trimming connectivity (skipped connections, dropout)"],"speaker_notes":"","asset_generation_prompt":"Icon of regularization techniques","_b64":null},{"slide_number":9,"layout_type":"Standard_Bullets","title":"Key Takeaways","bullets":["CNNs are essential in computer vision","Efficient feature extraction via convolution","Wide range of applications","Inspired by biological processes","Automated learning reduces human intervention"],"speaker_notes":"","asset_generation_prompt":"Summary icon with key points","_b64":null}];
+let cur=0,notesOn=false;
+const wrap=document.getElementById('wrap');
+const dots=document.getElementById('dots');
+const prog=document.getElementById('prog');
+
+function buildSlide(s,i){
+  const div=document.createElement('div');
+  div.className='slide'+(i===0?' active':'');
+  div.id='s'+i;
+  const layout=s.layout_type||'Standard_Bullets';
+  const img=s._b64?'<img class="asset-img" src="'+s._b64+'" alt="">':'<div class="asset-placeholder"></div>';
+  let inner='';
+  if(layout==='Title_Slide'){
+    inner='<div class="layout-Title_Slide"><div class="bar"></div><h2>'+s.title+'</h2>'+(s.bullets&&s.bullets[0]?'<p class="sub">'+s.bullets[0]+'</p>':'')+'<div class="bar"></div></div>';
+  }else if(layout==='Split_Metrics'){
+    const cards=(s.bullets||[]).map(b=>'<div class="metric-card">'+b+'</div>').join('');
+    inner='<div class="layout-Split_Metrics"><div class="split-left"><h2>'+s.title+'</h2>'+cards+'</div><div class="split-right">'+img+'</div></div>';
+  }else if(layout==='Visual_Hero'){
+    const ps=(s.bullets||[]).slice(0,2).map(b=>'<p>'+b+'</p>').join('');
+    const bg=s._b64?'<img class="hero-bg" src="'+s._b64+'" alt="">':'';
+    inner='<div class="layout-Visual_Hero">'+bg+'<div class="hero-grad"></div><div class="hero-content"><h2>'+s.title+'</h2>'+ps+'</div></div>';
+  }else{
+    const lis=(s.bullets||[]).map(b=>'<li>'+b+'</li>').join('');
+    inner='<div class="layout-Standard_Bullets"><h2>'+s.title+'</h2><ul>'+lis+'</ul></div>';
+  }
+  const notes=s.speaker_notes?'<div class="notes-bar" id="n'+i+'"><div class="notes-label">Speaker Notes</div><p>'+s.speaker_notes+'</p></div>':'';
+  div.innerHTML=inner+notes;
+  return div;
+}
+
+SLIDES.forEach((s,i)=>{
+  wrap.appendChild(buildSlide(s,i));
+  const d=document.createElement('button');
+  d.className='dot'+(i===0?' active':'');
+  d.onclick=()=>jump(i);
+  dots.appendChild(d);
+});
+
+function render(){
+  document.querySelectorAll('.slide').forEach((el,i)=>el.classList.toggle('active',i===cur));
+  document.querySelectorAll('.dot').forEach((d,i)=>d.classList.toggle('active',i===cur));
+  prog.style.width=((cur+1)/SLIDES.length*100)+'%';
+  document.getElementById('prevBtn').disabled=cur===0;
+  document.getElementById('nextBtn').disabled=cur===SLIDES.length-1;
+  document.querySelectorAll('.notes-bar').forEach(nb=>nb.classList.toggle('visible',notesOn));
+}
+
+function go(d){cur=Math.max(0,Math.min(SLIDES.length-1,cur+d));render();}
+function jump(i){cur=i;render();}
+
+document.addEventListener('keydown',e=>{
+  if(e.key==='ArrowRight'||e.key==='ArrowDown')go(1);
+  else if(e.key==='ArrowLeft'||e.key==='ArrowUp')go(-1);
+  else if(e.key==='n'||e.key==='N'){notesOn=!notesOn;render();}
+});
+render();
+</script>
+</body>
+</html>

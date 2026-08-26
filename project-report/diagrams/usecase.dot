@@ -1,0 +1,30 @@
+digraph UseCase {
+  rankdir=LR; bgcolor=white; ranksep=1.4; nodesep=0.18;
+  node [fontname="Helvetica", fontsize=11];
+  edge [color="#333333", arrowhead=none];
+
+  Student [shape=none, label="Student\n(Primary Actor)", fontsize=12, fontname="Helvetica-Bold"];
+  LLMSvc  [shape=box, style="rounded,filled", fillcolor="#fde68a", label="LLM Provider\n(External System)", fontsize=11];
+
+  node [shape=ellipse, style=filled, fillcolor="#e0e7ff", width=2.5, height=0.55];
+  U1 [label="Create / rename / delete notebook"];
+  U2 [label="Upload document or add URL"];
+  U3 [label="View auto-generated summary"];
+  U4 [label="Ask question and get cited answer"];
+  U5 [label="Review persistent chat history"];
+  U6 [label="Generate MCQ quiz and self-score"];
+  U7 [label="Generate concept mind map"];
+  U8 [label="Generate slide deck"];
+  U9 [label="Export deck as offline HTML"];
+  U10[label="Delete document from notebook"];
+
+  Student -> U1; Student -> U2; Student -> U3; Student -> U4; Student -> U5;
+  Student -> U6; Student -> U7; Student -> U8; Student -> U9; Student -> U10;
+
+  U2 -> LLMSvc [style=dashed, label=" «include»\n embed", fontsize=9];
+  U3 -> LLMSvc [style=dashed];
+  U4 -> LLMSvc [style=dashed];
+  U6 -> LLMSvc [style=dashed];
+  U7 -> LLMSvc [style=dashed];
+  U8 -> LLMSvc [style=dashed];
+}

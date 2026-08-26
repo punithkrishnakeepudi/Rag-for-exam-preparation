@@ -1,0 +1,15 @@
+digraph Query {
+  rankdir=TB; bgcolor=white; nodesep=0.25; ranksep=0.42;
+  node [shape=box, style="rounded,filled", fillcolor="#ccfbf1", fontname="Helvetica", fontsize=12, margin="0.24,0.13", width=4.4];
+  edge [fontname="Helvetica", fontsize=10, color="#333333"];
+
+  Q [label="Student types a question in the Chat Panel", fillcolor="#e0e7ff"];
+  E [label="Question converted to a query vector\nby the embedding model", fillcolor="#fde68a"];
+  S [label="ChromaDB cosine similarity search\ntop-k = 3 most relevant chunks", shape=cylinder, fillcolor="#fef3c7"];
+  C [label="Grounded prompt assembled\nsystem rule + retrieved chunks + last 4 turns + question"];
+  L [label="Chat model streams the answer token by token\nover Server-Sent Events", fillcolor="#fde68a"];
+  U [label="Answer rendered progressively in the browser\nwith source citation chips", fillcolor="#e0e7ff"];
+  D [label="User turn and assistant turn persisted to SQLite\nwith their source metadata", shape=cylinder, fillcolor="#fef3c7"];
+
+  Q -> E -> S -> C -> L -> U -> D;
+}

@@ -1,0 +1,45 @@
+digraph DFD {
+  rankdir=LR; bgcolor=white; nodesep=0.55; ranksep=1.5; splines=spline;
+  node [fontname="Helvetica", fontsize=11];
+  edge [fontname="Helvetica", fontsize=9, color="#333333"];
+
+  Student [shape=box, style="filled", fillcolor="#e0e7ff", label="Student", penwidth=1.6, width=1.4, height=0.8];
+  LLM [shape=box, style="filled", fillcolor="#fde68a", label="LLM Provider\n(external entity)", penwidth=1.6];
+
+  node [shape=circle, style=filled, fillcolor="#ccfbf1", width=1.30, fixedsize=true, fontsize=10];
+  P1 [label="1.0\nManage\nNotebook"];
+  P2 [label="2.0\nIngest &\nIndex"];
+  P3 [label="3.0\nRetrieve\n& Answer"];
+  P4 [label="4.0\nGenerate\nStudy Aids"];
+
+  node [shape=record, style=filled, fillcolor="#fef3c7", fixedsize=false, fontsize=10];
+  D1 [label="{D1|SQLite —\nnotebooks · documents · messages}"];
+  D2 [label="{D2|ChromaDB —\nchunk vectors + metadata}"];
+  D3 [label="{D3|File store —\nuploads · generated assets}"];
+
+  { rank=same; P1; P2; P3; P4; }
+  { rank=same; D1; D2; D3; }
+
+  Student -> P1 [label="notebook name"];
+  Student -> P2 [label="file / URL"];
+  Student -> P3 [label="question"];
+  Student -> P4 [label="quiz / map / deck\nrequest"];
+
+  P1 -> D1 [label="notebook record"];
+  P2 -> D3 [label="stored file"];
+  P2 -> D2 [label="vectors"];
+  P2 -> D1 [label="chunk_count,\nsummary"];
+  P3 -> D1 [label="chat turns"];
+  D2 -> P3 [label="top-k chunks"];
+  D2 -> P4 [label="stored chunk text"];
+
+  P2 -> LLM [label="chunk text"];
+  LLM -> P2 [label="embeddings,\nsummary"];
+  P3 -> LLM [label="grounded prompt"];
+  LLM -> P3 [label="token stream"];
+  P4 -> LLM [label="task prompt"];
+  LLM -> P4 [label="MCQs / graph JSON /\ndeck JSON"];
+
+  P3 -> Student [label="answer + citations"];
+  P4 -> Student [label="study aid"];
+}

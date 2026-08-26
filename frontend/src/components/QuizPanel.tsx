@@ -24,8 +24,9 @@ function parseQuiz(text: string): Question[] {
     const question = qMatch[1].replace(/\n/g, ' ').trim()
     const opts: Record<string, string> = {}
     for (const letter of ['A', 'B', 'C', 'D']) {
-      const m = block.match(new RegExp(`${letter}[.)\\s]\\s*(.+)`, 'i'))
-      if (m) opts[letter] = m[1].split('\n')[0].trim()
+      // Anchor to line start so a stray "a " inside the question text can't match.
+      const m = block.match(new RegExp(`^[ \\t]*${letter}[.)][ \\t]*(.+)$`, 'm'))
+      if (m) opts[letter] = m[1].trim()
     }
     const ansMatch = block.match(/Answer[:.]\s*([A-D])/i)
     if (Object.keys(opts).length === 4 && ansMatch) {

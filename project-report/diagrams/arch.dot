@@ -1,0 +1,45 @@
+digraph Architecture {
+  rankdir=TB; bgcolor="white"; nodesep=0.35; ranksep=0.55;
+  node [shape=box, style="rounded,filled", fontname="Helvetica", fontsize=11, margin="0.20,0.12"];
+  edge [fontname="Helvetica", fontsize=10, color="#333333"];
+
+  subgraph cluster_client {
+    label="PRESENTATION LAYER   —   React 18 + TypeScript + Vite + Tailwind CSS";
+    fontname="Helvetica-Bold"; fontsize=12; color="#4f46e5"; style="rounded"; penwidth=1.8; margin=14;
+    UI [label="Home / Notebook Dashboard   |   Document Panel   |   Chat Panel   |   Quiz Panel   |   Mind Map Panel   |   Slides Panel",
+        shape=record, style="filled", fillcolor="#e0e7ff", fontsize=11];
+  }
+
+  subgraph cluster_api {
+    label="APPLICATION LAYER   —   FastAPI + Uvicorn (ASGI)";
+    fontname="Helvetica-Bold"; fontsize=12; color="#0d9488"; style="rounded"; penwidth=1.8; margin=14;
+    REST [label="REST API\nnotebooks · documents · messages", fillcolor="#ccfbf1"];
+    SSE  [label="SSE Streaming API\nchat · quiz · mindmap · slides", fillcolor="#ccfbf1"];
+    ING  [label="Ingestion & Chunking\nPyMuPDF · python-docx · trafilatura\n256 words / 32 overlap", fillcolor="#ccfbf1"];
+    RET  [label="Retriever & Prompt Builder\ncosine top-k (k = 3)", fillcolor="#ccfbf1"];
+  }
+
+  subgraph cluster_data {
+    label="DATA & MODEL LAYER";
+    fontname="Helvetica-Bold"; fontsize=12; color="#b45309"; style="rounded"; penwidth=1.8; margin=14;
+    CHR [label="ChromaDB\nvector store\n(one collection per notebook)", shape=cylinder, fillcolor="#fef3c7"];
+    SQL [label="SQLite via SQLModel\nNotebook · Document · Message", shape=cylinder, fillcolor="#fef3c7"];
+    FS  [label="Local File Store\ndata/uploads · data/assets", shape=folder, fillcolor="#fef3c7"];
+    LLM [label="LLM Provider Client\nchat model + embedding model", fillcolor="#fde68a"];
+  }
+
+  UI -> REST [label="  HTTP / JSON"];
+  UI -> SSE  [label="  text/event-stream"];
+
+  REST -> ING;
+  REST -> SQL [label="  CRUD"];
+  SSE  -> RET;
+  SSE  -> SQL [label="  persist chat"];
+
+  ING -> FS  [label="  save file"];
+  ING -> LLM [label="  embed chunks"];
+  ING -> CHR [label="  store vectors"];
+
+  RET -> CHR [label="  similarity search"];
+  RET -> LLM [label="  stream tokens"];
+}
